@@ -46,40 +46,103 @@ export default function Fractions3D() {
     Html: any;
     Pizza3D: React.ComponentType<any>;
   }>(null);
+  const [resetCounter, setResetCounter] = useState(0);
+  const [showInstructions, setShowInstructions] = useState(false);
+  const [forceLoad, setForceLoad] = useState(false);
+  const [dynamicError, setDynamicError] = useState<string | null>(null);
 
   useEffect(() => {
-    setWebgl(isWebGLAvailable());
+    const params = new URLSearchParams(location.search);
+    const force = params.get('force3d') === '1';
+    const detected = isWebGLAvailable();
+    // log detection result for debugging
+    // eslint-disable-next-line no-console
+    console.log('Fractions3D: isWebGLAvailable ->', detected, 'force override ->', force);
+    setWebgl(force || detected);
   }, []);
 
   // Carga dinámica de los módulos pesados para evitar fallos en la
   // evaluación estática del módulo (p. ej. errores de three/drei)
   useEffect(() => {
-    if (!webgl) return;
+    // Load dynamic modules if WebGL is available or user forced load
+    if (!webgl && !forceLoad) return;
     let mounted = true;
-    Promise.all([
-      import("@react-three/fiber"),
-      import("@react-three/drei"),
-      import("../components/Pizza3D"),
-    ])
-      .then(([fiber, drei, pizza]) => {
+    setDynamicError(null);
+    (async () => {
+      try {
+        const fiber = await import("@react-three/fiber");
+        const pizza = await import("../components/Pizza3D");
+
+        // Try to load drei, but tolerate failure and provide a fallback
+        let drei: any = null;
+        try {
+          drei = await import("@react-three/drei");
+        } catch (e) {
+          console.warn("@react-three/drei failed to load, will use fallback OrbitControls", e);
+        }
+
         if (!mounted) return;
-        setThreeComponents({
-          Canvas: fiber.Canvas,
-          OrbitControls: drei.OrbitControls,
-          Environment: drei.Environment,
-          Html: drei.Html,
-          Pizza3D: pizza.default,
-        });
-      })
-      .catch((err) => {
+
+        if (drei) {
+          setThreeComponents({
+            Canvas: fiber.Canvas,
+            OrbitControls: drei.OrbitControls,
+            Environment: drei.Environment,
+            Html: drei.Html,
+            Pizza3D: pizza.default,
+          });
+        } else {
+          // Build a lightweight OrbitControls fallback using three's examples
+          const OrbitControlsFallback = (() => {
+            const { useThree, useFrame } = fiber as any;
+            return function OrbitControlsFallback(props: any) {
+              const ref = React.useRef<any>(null);
+              const controlsRef = React.useRef<any>(null);
+              const { camera, gl } = (fiber as any).useThree();
+              React.useEffect(() => {
+                let mountedInner = true;
+                import("three/examples/jsm/controls/OrbitControls").then((mod) => {
+                  if (!mountedInner) return;
+                  const Controls = (mod as any).OrbitControls;
+                  controlsRef.current = new Controls(camera, gl.domElement);
+                  controlsRef.current.enablePan = props.enablePan === undefined ? false : props.enablePan;
+                  controlsRef.current.minDistance = props.minDistance ?? 1.5;
+                  controlsRef.current.maxDistance = props.maxDistance ?? 6;
+                  controlsRef.current.maxPolarAngle = props.maxPolarAngle ?? Math.PI / 1.9;
+                }).catch((err) => {
+                  console.error("Failed to load OrbitControls example module:", err);
+                });
+                return () => {
+                  mountedInner = false;
+                  if (controlsRef.current) controlsRef.current.dispose();
+                };
+              }, [camera, gl, props.enablePan, props.minDistance, props.maxDistance, props.maxPolarAngle]);
+
+              useFrame(() => {
+                if (controlsRef.current) controlsRef.current.update();
+              });
+
+              return null;
+            };
+          })();
+
+          setThreeComponents({
+            Canvas: fiber.Canvas,
+            OrbitControls: OrbitControlsFallback,
+            Environment: () => null,
+            Html: ({ children }: any) => children,
+            Pizza3D: pizza.default,
+          });
+        }
+      } catch (err: any) {
         console.error("Error cargando módulos 3D:", err);
-        // desactivar webgl view si hay error
-        setWebgl(false);
-      });
+        setDynamicError(String(err?.message || err));
+      }
+    })();
     return () => {
       mounted = false;
     };
-  }, [webgl]);
+  }, [webgl, forceLoad]);
 
   return (
     <div className="flex flex-col h-full">
@@ -90,6 +153,31 @@ export default function Fractions3D() {
           acerca/aleja con rueda o gesto de pinza.
         </p>
       </header>
+
+      {/* Estado de detección y control de carga (útil para depuración) */}
+      <div className="p-3 border-b bg-white/50 flex items-center gap-4">
+        <div className="text-sm">WebGL detectado: <strong>{String(webgl)}</strong></div>
+        <div className="text-sm">Módulos 3D cargados: <strong>{ThreeComponents ? 'sí' : 'no'}</strong></div>
+        <div className="text-sm">Error dinámico: <strong className="text-red-600">{dynamicError ?? '—'}</strong></div>
+        <div className="ml-auto flex items-center gap-2">
+          <button
+            className="px-3 py-1 rounded bg-emerald-600 text-white"
+            onClick={() => setForceLoad(true)}
+          >
+            Forzar carga 3D
+          </button>
+          <button
+            className="px-3 py-1 rounded bg-slate-200"
+            onClick={() => {
+              setDynamicError(null);
+              setThreeComponents(null);
+              setForceLoad(false);
+            }}
+          >
+            Reset
+          </button>
+        </div>
+      </div>
 
       <main className="flex-1 relative bg-gray-50">
         {!webgl ? (
@@ -111,15 +199,47 @@ export default function Fractions3D() {
               (() => {
                 const { Canvas, OrbitControls, Environment, Html, Pizza3D } = ThreeComponents;
                 return (
-                  <Canvas shadows dpr={[1, 2]} camera={{ position: [2.5, 2.3, 2.5], fov: 50 }}>
-                    <Suspense fallback={<div className="p-4">Cargando escena…</div>}>
-                      <ambientLight intensity={0.7} />
-                      <directionalLight position={[5, 5, 5]} intensity={0.9} />
-                      <Environment preset="city" />
-                      <Pizza3D />
-                      <OrbitControls enablePan={false} minDistance={1.5} maxDistance={6} maxPolarAngle={Math.PI / 1.9} />
-                    </Suspense>
-                  </Canvas>
+                  <div className="h-full w-full relative">
+                    {/* UI overlay (DOM) - always legible and accessible */}
+                    <div className="absolute top-3 right-3 z-50 flex flex-col gap-2">
+                      <button
+                        aria-label="Volver al inicio"
+                        className="bg-emerald-600 text-white px-3 py-1 rounded-md shadow"
+                        onClick={() => setResetCounter((c) => c + 1)}
+                      >
+                        Volver al inicio
+                      </button>
+                      <button
+                        aria-expanded={showInstructions}
+                        aria-controls="fracciones-instructions"
+                        className="bg-slate-100 text-slate-800 px-3 py-1 rounded-md shadow"
+                        onClick={() => setShowInstructions((s) => !s)}
+                      >
+                        {showInstructions ? 'Ocultar instrucciones' : 'Mostrar instrucciones'}
+                      </button>
+                    </div>
+
+                    {showInstructions && (
+                      <div id="fracciones-instructions" className="absolute top-3 left-3 z-50 max-w-xs p-3 bg-white/90 text-slate-900 rounded shadow">
+                        <h3 className="font-semibold">Controles 3D</h3>
+                        <ul className="text-sm mt-2">
+                          <li>Rotar: arrastra con mouse o con el dedo (móvil).</li>
+                          <li>Zoom: rueda del mouse o gesto pinch (móvil).</li>
+                          <li>Volver al inicio: restaura la cámara a la posición inicial.</li>
+                        </ul>
+                      </div>
+                    )}
+
+                    <Canvas key={resetCounter} shadows dpr={[1, 2]} camera={{ position: [2.5, 2.3, 2.5], fov: 50 }}>
+                      <Suspense fallback={<div className="p-4">Cargando escena…</div>}>
+                        <ambientLight intensity={0.7} />
+                        <directionalLight position={[5, 5, 5]} intensity={0.9} />
+                        <Environment preset="city" />
+                        <Pizza3D />
+                        <OrbitControls enablePan={false} enableZoom={true} enableRotate={true} minDistance={1.5} maxDistance={6} maxPolarAngle={Math.PI / 1.9} />
+                      </Suspense>
+                    </Canvas>
+                  </div>
                 );
               })()
             )}

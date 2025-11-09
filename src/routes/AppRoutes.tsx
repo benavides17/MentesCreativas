@@ -15,6 +15,7 @@ const ValidContrasena = lazy(() => import("../views/ValidContrasena"));
 const ContadorClics = lazy(() => import("../views/ContadorClics"));
 const ListaTareas = lazy(() => import("../views/ListaTareas"));
 // Nuevo proyecto
+// Cargamos la vista de Fracciones 3D perezosamente
 const Fractions3D = lazy(() => import("../views/Fractions3D"));
 
 export default function AppRoutes() {
