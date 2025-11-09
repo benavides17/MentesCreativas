@@ -39,6 +39,20 @@ class ErrorBoundary extends React.Component<
 
 export default function Fractions3D() {
   const [webgl, setWebgl] = useState(true);
+  const DEFAULT_COLORS = { base: "#D2B48C", cheese: "#F7D9A6", toppings: "#C1443C" };
+  const PALETTE = [
+    { name: "Amarillo claro", color: "#F7D9A6" },
+    { name: "Masa", color: "#D2B48C" },
+    { name: "Rojo tomate", color: "#C1443C" },
+    { name: "Verde pesto", color: "#6DA34D" },
+    { name: "Marrón", color: "#8B5E3C" },
+    { name: "Blanco", color: "#FFFFFF" },
+    { name: "Negro", color: "#000000" },
+  ];
+  const STORAGE_KEY = "pizza3d-colors-v1";
+
+  const [colors, setColors] = useState<Record<string, string>>(DEFAULT_COLORS);
+  const [activePart, setActivePart] = useState<"base" | "cheese" | "toppings">("cheese");
   const [ThreeComponents, setThreeComponents] = useState<null | {
     Canvas: any;
     OrbitControls: any;
@@ -60,6 +74,31 @@ export default function Fractions3D() {
     console.log('Fractions3D: isWebGLAvailable ->', detected, 'force override ->', force);
     setWebgl(force || detected);
   }, []);
+
+  // load saved colors
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) setColors((prev) => ({ ...prev, ...(JSON.parse(raw) || {}) }));
+    } catch (e) {
+      console.warn("Failed to load pizza colors", e);
+    }
+  }, []);
+
+  // Cleanup any leftover DOM overlays created by previous Pizza3D implementations
+  useEffect(() => {
+    const leftovers = document.querySelectorAll('[data-pizza-controls]');
+    leftovers.forEach((el) => el.remove());
+  }, []);
+
+  // persist colors
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(colors));
+    } catch (e) {
+      console.warn("Failed to persist pizza colors", e);
+    }
+  }, [colors]);
 
   // Carga dinámica de los módulos pesados para evitar fallos en la
   // evaluación estática del módulo (p. ej. errores de three/drei)
@@ -201,22 +240,76 @@ export default function Fractions3D() {
                 return (
                   <div className="h-full w-full relative">
                     {/* UI overlay (DOM) - always legible and accessible */}
-                    <div className="absolute top-3 right-3 z-50 flex flex-col gap-2">
-                      <button
-                        aria-label="Volver al inicio"
-                        className="bg-emerald-600 text-white px-3 py-1 rounded-md shadow"
-                        onClick={() => setResetCounter((c) => c + 1)}
-                      >
-                        Volver al inicio
-                      </button>
-                      <button
-                        aria-expanded={showInstructions}
-                        aria-controls="fracciones-instructions"
-                        className="bg-slate-100 text-slate-800 px-3 py-1 rounded-md shadow"
-                        onClick={() => setShowInstructions((s) => !s)}
-                      >
-                        {showInstructions ? 'Ocultar instrucciones' : 'Mostrar instrucciones'}
-                      </button>
+                    <div className="absolute top-3 right-3 z-50 flex flex-col gap-2 items-end">
+                      <div className="flex gap-2">
+                        <button
+                          aria-label="Volver al inicio"
+                          className="bg-emerald-600 text-white px-3 py-1 rounded-md shadow"
+                          onClick={() => setResetCounter((c) => c + 1)}
+                        >
+                          Volver al inicio
+                        </button>
+                        <button
+                          aria-expanded={showInstructions}
+                          aria-controls="fracciones-instructions"
+                          className="bg-slate-100 text-slate-800 px-3 py-1 rounded-md shadow"
+                          onClick={() => setShowInstructions((s) => !s)}
+                        >
+                          {showInstructions ? 'Ocultar instrucciones' : 'Mostrar instrucciones'}
+                        </button>
+                      </div>
+
+                      {/* Color controls */}
+                      <div className="bg-white/95 p-2 rounded shadow w-56 text-sm">
+                        <div className="flex justify-between items-center">
+                          <strong>Colores 3D</strong>
+                          <button
+                            onClick={() => setColors(DEFAULT_COLORS)}
+                            className="px-2 py-1 bg-slate-100 rounded text-xs"
+                            aria-label="Reiniciar colores al defecto"
+                          >
+                            Reiniciar
+                          </button>
+                        </div>
+
+                        <div className="mt-2">
+                          <div className="text-xs text-slate-600">Parte activa:</div>
+                          <div className="flex gap-2 mt-1">
+                            {(["base", "cheese", "toppings"] as const).map((p) => (
+                              <button
+                                key={p}
+                                onClick={() => setActivePart(p)}
+                                className={`px-2 py-1 rounded ${activePart === p ? 'border-2 border-blue-600' : 'border'} bg-white text-xs`}
+                                aria-pressed={activePart === p}
+                              >
+                                {p}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="mt-2">
+                          <div className="text-xs text-slate-600">Paleta</div>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {PALETTE.map((c) => (
+                              <button
+                                key={c.color}
+                                title={`${c.name} ${c.color}`}
+                                onClick={() => setColors((s) => ({ ...s, [activePart]: c.color }))}
+                                style={{ background: c.color }}
+                                className="w-8 h-8 rounded border"
+                                aria-label={`Aplicar color ${c.name} a ${activePart}`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="mt-2 text-xs">
+                          Activo: <strong>{activePart}</strong>
+                          <div>Color: <code>{colors[activePart]}</code></div>
+                        </div>
+
+                      </div>
                     </div>
 
                     {showInstructions && (
@@ -235,7 +328,7 @@ export default function Fractions3D() {
                         <ambientLight intensity={0.7} />
                         <directionalLight position={[5, 5, 5]} intensity={0.9} />
                         <Environment preset="city" />
-                        <Pizza3D />
+                        <Pizza3D colors={colors} />
                         <OrbitControls enablePan={false} enableZoom={true} enableRotate={true} minDistance={1.5} maxDistance={6} maxPolarAngle={Math.PI / 1.9} />
                       </Suspense>
                     </Canvas>
