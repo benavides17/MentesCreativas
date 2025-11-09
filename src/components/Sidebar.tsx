@@ -31,9 +31,9 @@ export default function Sidebar() {
       key={route}
       to={route}
       className={({ isActive }) =>
-        `w-full text-left rounded-lg px-3 py-2 text-slate-700 dark:text-slate-300
-         hover:bg-slate-50 dark:hover:bg-slate-800 min-h-[40px]
-         ${isActive ? "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300" : ""}`
+        `w-full text-left rounded-lg px-3 py-2 text-slate-500 dark:text-slate-900
+         hover:bg-slate-50 dark:hover:bg-slate-900 min-h-[40px]
+         ${isActive ? "bg-emerald-50 dark:bg-emerald-500/30 text-emerald-700 dark:text-emerald-300" : ""}`
       }
     >
       <div className="flex items-center gap-2 whitespace-normal">
@@ -44,14 +44,14 @@ export default function Sidebar() {
   );
 
   return (
-    <aside className="hidden md:block w-full md:w-[240px] border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+    <aside className="hidden md:block w-full md:w-[240px] border-r border-slate-900 dark:border-slate-900 bg-slate-600 dark:bg-teal-600">
       <div className="p-3 space-y-1">
 
         {/* Acordeón Main Items */}
         <button
           onClick={() => setOpenMain(!openMain)}
-          className="w-full text-left flex items-center justify-between rounded-lg px-3 py-2 text-slate-700 dark:text-slate-300 
-                     hover:bg-slate-50 dark:hover:bg-slate-800 font-medium"
+          className="w-full text-left flex items-center justify-between rounded-lg px-3 py-2 texttext-slate-900 dark:text-slate-900 
+                     hover:bg-slate-900 dark:hover:bg-slate-500 font-medium"
         >
           Menú Principal
           <span>{openMain ? "▲" : "▼"}</span>
@@ -61,8 +61,8 @@ export default function Sidebar() {
         {/* Acordeón Exercises */}
         <button
           onClick={() => setOpenExercises(!openExercises)}
-          className="w-full text-left flex items-center justify-between rounded-lg px-3 py-2 text-slate-700 dark:text-slate-300 
-                     hover:bg-slate-50 dark:hover:bg-slate-800 font-medium"
+          className="w-full text-left flex items-center justify-between rounded-lg px-3 py-2 text-slate-600 dark:text-slate-900 
+                     hover:bg-slate-50 dark:hover:bg-slate-500 font-medium"
         >
           Ejercicios - Jtest
           <span>{openExercises ? "▲" : "▼"}</span>

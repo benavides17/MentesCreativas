@@ -57,7 +57,7 @@ export default function ColorPalette({ currentHex, onSetHex, onRandom, onReset, 
           <>
             <button
               onClick={() => onSetModel("pizza")}
-              className={`px-3 py-1.5 rounded-lg text-sm ${currentModel === "pizza" ? "bg-emerald-600 text-white" : "border"}`}
+              className={`px-3 py-1.5 rounded-lg text-sm ${currentModel === "pizza" ? "bg-emerald-600 text-dark" : "border"}`}
               aria-pressed={currentModel === "pizza"}
             >
               Pizza

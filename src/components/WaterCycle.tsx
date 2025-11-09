@@ -29,11 +29,11 @@ export default function WaterCycle() {
   }, [idx]);
 
   return (
-    <div className="bg-white p-4 rounded shadow">
+    <div className="bg-gray-400 p-4 rounded shadow">
       <div className="md:flex gap-4 items-start">
         <div className="flex-1">
           <h3 className="text-lg font-semibold">{steps[idx].title}</h3>
-          <p className="mt-2 text-sm text-slate-700">{steps[idx].text}</p>
+          <p className="mt-2 text-sm text-slate-900">{steps[idx].text}</p>
 
           <div className="mt-4 flex gap-2 flex-wrap">
             <button onClick={() => { setPlaying(false); setIdx((i) => Math.max(0, i - 1)); }} className="px-3 py-1.5 rounded border">Anterior</button>

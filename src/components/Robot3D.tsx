@@ -218,5 +218,5 @@ export default function Robot3D() {
     };
   }, [isWaving, speed]);
 
-  return <div ref={stageRef} className="w-full h-[520px] border bg-white" aria-label="Visor Robot 3D" />;
+  return <div ref={stageRef} className="w-full h-[520px] border bg-gray-500" aria-label="Visor Robot 3D" />;
 }

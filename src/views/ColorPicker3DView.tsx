@@ -207,7 +207,7 @@ export default function ColorPicker3DView() {
         <ColorPalette currentHex={currentHex} onSetHex={setColor} onRandom={setRandomColor} onReset={resetColor} currentModel={model} onSetModel={(m) => setModel(m)} />
       </div>
 
-      <div ref={stageRef} className="w-full h-[420px] border bg-white" aria-label="Escena 3D" />
+      <div ref={stageRef} className="w-full  h-[420px] border bg-gray-500" aria-label="Escena 3D" />
     </div>
   );
 }
