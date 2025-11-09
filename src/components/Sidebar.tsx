@@ -1,6 +1,18 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { FaHome, FaCube, FaColumns, FaMicrophone, FaShapes, FaCalculator, FaRuler, FaKey, FaMouse, FaList } from "react-icons/fa";
+import {
+  FaHome,
+  FaCube,
+  FaColumns,
+  FaMicrophone,
+  FaShapes,
+  FaCalculator,
+  FaRuler,
+  FaKey,
+  FaMouse,
+  FaList,
+  FaPizzaSlice, // 🔹 nuevo ícono
+} from "react-icons/fa";
 
 interface SidebarItem {
   label: string;
@@ -13,7 +25,8 @@ const mainItems: SidebarItem[] = [
   { label: "Three.js Demo", route: "/three", icon: <FaCube /> },
   { label: "Responsive Layouts", route: "/layouts", icon: <FaColumns /> },
   { label: "Text-to-Speech", route: "/tts", icon: <FaMicrophone /> },
-  { label: "Figuras Geometricas", route: "/three_2", icon: <FaShapes /> },
+  { label: "Figuras Geométricas", route: "/three_2", icon: <FaShapes /> },
+  { label: "Fracciones 3D", route: "/fracciones3d", icon: <FaPizzaSlice /> }, // 🍕 nuevo enlace
 ];
 
 const exerciseItems: SidebarItem[] = [
@@ -43,7 +56,7 @@ export default function Sidebar() {
   );
 
   return (
-    <aside className="hidden md:block w-full md:w-[240px] border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+    <aside className="block w-full md:w-[240px] border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
       <div className="p-3 space-y-1">
 
         {/* Acordeón Main Items */}

@@ -5,6 +5,10 @@ import Navbar from "./Navbar";
 export default function Layout() {
   return (
     <div className="flex h-screen">
+      {/* Debug badge para comprobar si React monta la UI */}
+      <div style={{ position: 'fixed', top: 8, left: 8, background: 'crimson', color: 'white', padding: '6px 8px', borderRadius: 6, zIndex: 9999 }}>
+        app-mounted
+      </div>
       {/* Sidebar */}
       <Sidebar />
 

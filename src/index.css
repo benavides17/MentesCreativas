@@ -1,1 +1,6 @@
-@import "tailwindcss";
+/* Import styles adicionales del proyecto (debe ir antes de otras reglas @) */
+@import "./style.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
