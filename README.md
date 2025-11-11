@@ -306,14 +306,7 @@ Workflow `deploy-pages.yml` publica automáticamente el build a **GitHub Pages**
 - Incorporar prueba de snapshot visual (Playwright) para vistas críticas.
 - Añadir badge de estado CI y de deploy en el encabezado de este README.
 
----
 
-### Badges (pendiente de activar)
-Una vez corra el pipeline tras el primer push, agregar:
-```md
-![CI](https://github.com/<OWNER>/<REPO>/actions/workflows/jest.yml/badge.svg)
-![Deploy](https://github.com/<OWNER>/<REPO>/actions/workflows/deploy-pages.yml/badge.svg)
-```
 
 ## 8. Pruebas de Sistema: Rendimiento y Auditorías
 
