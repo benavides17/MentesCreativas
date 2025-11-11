@@ -10,7 +10,8 @@
     "type-check": "tsc --noEmit",
     "lint": "eslint . --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0",
     "format": "prettier --write .",
-    "test": "jest --passWithNoTests"
+    "test": "jest --passWithNoTests",
+    "ci": "npm ci && npm run type-check && npm run lint && npm test -- --ci && npm run build"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.6",
