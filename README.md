@@ -213,9 +213,37 @@ En conjunto, el módulo de Ciencias Naturales transforma un concepto abstracto e
 
 
 
-## 5 Punto
+## 5. Pruebas Unitarias
 
-## 6 Punto
+Cómo se aplicó
+- Se implementó una batería de pruebas con Jest 30 + React Testing Library sobre componentes clave: `App`, `ColorPalette`, `WaterCycle`, `Robot3DView` y un placeholder `Robot3D`.
+- Se validan interacciones, estados y accesibilidad básica (labels, foco visible, cambios de texto). Para Three.js se evita el render real y se prueban eventos que el contenedor emite.
+
+Cómo se integró
+- Archivo `src/setupTests.ts` centraliza polyfills (matchMedia, localStorage) y mocks de dependencias pesadas (OrbitControls y vistas 3D en pruebas de flujo).
+- Se adaptó el enrutado con imports dinámicos para que Jest no parsee Three.js en el arranque (lazy routes + `Suspense`).
+- En CI (`.github/workflows/jest.yml`) las unitarias corren junto con lint, type-check y build.
+
+Análisis de resultados
+- La suite es estable: 14 pruebas pasan localmente y en CI sin flakiness reportada.
+- Los mocks de 3D eliminaron fallos de WebGL/ESM en `jsdom`, manteniendo la intención de las pruebas (validar eventos y estado, no el render físico).
+- Oportunidades: añadir medición de cobertura y aserciones de ARIA más exhaustivas con axe en pruebas unitarias.
+
+## 6. Pruebas de Integración
+
+Cómo se aplicó
+- Se cubrieron flujos completos en `src/integration/`: navegación por Sidebar y rutas, conmutación de tema, reproducción del Ciclo del Agua y uso de la Paleta de Colores con el modelo 3D.
+- Se usan timers falsos para validar autoplay y progresión temporal, y se mockean vistas 3D pesadas para mantener el entorno ligero.
+
+Cómo se integró
+- Los tests emplean `MemoryRouter` y el árbol real de rutas (`AppRoutes`) para simular navegación.
+- El estado de tema persiste en `localStorage` y se verifica contra `document.documentElement.classList`.
+- Se ejecutan en el mismo job de CI que las unitarias, garantizando feedback en cada PR.
+
+Análisis de resultados
+- Los flujos críticos pasan de extremo a extremo: navegación, cambio de tema, ciclo y paleta funcionan según lo esperado.
+- Se simplificó la prueba de navegación para evitar errores de canvas, manteniendo cobertura de intención.
+- Próximos pasos: pruebas de teclado (Tab order) y verificación de `aria-current` en el Sidebar.
 ## 7. CI/CD Automatizado
 
 ### 7.1 Flujo de Integración Continua (CI)
@@ -230,6 +258,17 @@ Se configuró un flujo en GitHub Actions (`.github/workflows/jest.yml`) que ejec
 7. Publicación del artefacto `dist` como *artifact* descargable.
 
 La matriz corre en Node 18 y 20 para asegurar compatibilidad. El job cancela ejecuciones anteriores en la misma rama (`concurrency`).
+
+Cómo se aplicó
+- Se configuraron workflows dedicados: `jest.yml` (CI de calidad), `deploy-pages.yml` (CD a Pages), `jmeter.yml` y `lighthouse.yml` (pruebas de sistema). Todos comparten instalación reproducible con `npm ci` y build de Vite.
+
+Cómo se integró
+- Los checks de tipos, lint, unitarias e integración corren en cada push/PR a `main`. Los jobs de rendimiento/auditoría se ejecutan on-demand vía `workflow_dispatch`.
+- El despliegue usa artefactos generados por el build y acciones oficiales de Pages.
+
+Análisis de resultados
+- El pipeline provee señales rápidas: falla si hay errores de tipos/lint/tests; build estable tras pruebas.
+- Los workflows de sistema suben artefactos (JTL, reportes Lighthouse) y resumen en el Job Summary, facilitando trazabilidad sin bloquear los PRs.
 
 ### 7.2 Script Agregado de CI Local
 Se añadió el script agregado `npm run ci` en `package.json` que encadena: instalación, type-check, lint, test y build. Útil para reproducir el entorno de Actions localmente antes de hacer push.
@@ -276,3 +315,126 @@ Una vez corra el pipeline tras el primer push, agregar:
 ![CI](https://github.com/<OWNER>/<REPO>/actions/workflows/jest.yml/badge.svg)
 ![Deploy](https://github.com/<OWNER>/<REPO>/actions/workflows/deploy-pages.yml/badge.svg)
 ```
+
+## 8. Pruebas de Sistema: Rendimiento y Auditorías
+
+### 8.1 Carga y rendimiento con JMeter
+Se añadió un plan de prueba (`perf/jmeter-test.jmx`) parametrizable para estresar la página raíz (`/`) con variables:
+- `users` (usuarios concurrentes)
+- `ramp` (segundos de rampa)
+- `duration` (duración total en segundos)
+
+Workflow: `.github/workflows/jmeter.yml`
+- Construye el sitio (`npm run build`).
+- Sirve `dist` localmente en `http://localhost:8080`.
+- Ejecuta JMeter en modo no interactivo con los parámetros configurables desde `workflow_dispatch`.
+- Publica `perf/jmeter-results.jtl` como artifact y un resumen en el Job Summary.
+
+Ejecución manual:
+1) Ir a la pestaña Actions → perf-jmeter → Run workflow.
+2) Ajustar `users`, `ramp`, `duration` si se desea.
+3) Al finalizar, descargar el artifact y revisar el resumen.
+
+Resumen automático: `scripts/parse-jmeter.js` lee el `.jtl` y genera métricas (samples, tasa de éxito, latencias min/avg/p90/p95/p99/max) que se publican en el job.
+
+### 8.2 Auditoría Lighthouse CI
+Configuración en `lighthouserc.json` para auditar la build estática (`dist`) con preset de escritorio y umbrales mínimos por categoría (avisos si se incumplen):
+- Performance ≥ 0.8
+- Accessibility ≥ 0.9
+- Best Practices ≥ 0.9
+- SEO ≥ 0.9
+
+Workflow: `.github/workflows/lighthouse.yml`
+- Construye y sirve `dist` en `http://localhost:4173`.
+- Ejecuta `treosh/lighthouse-ci-action` con el archivo `lighthouserc.json`.
+- Sube artefactos y enlaces de almacenamiento temporal.
+
+Para ejecutar: Actions → perf-lighthouse → Run workflow.
+
+Cómo se aplicó
+- Carga: plan JMeter (`perf/jmeter-test.jmx`) parametrizable que golpea la Home con usuarios concurrentes y rampa; guarda `.jtl` para análisis.
+- Auditoría: `lighthouserc.json` con preset desktop y umbrales por categoría; URLs colectadas desde `dist`.
+
+Cómo se integró
+- Workflows `jmeter.yml` y `lighthouse.yml` construyen, sirven localmente `dist` y ejecutan las herramientas. Publican artefactos y resumen en el job.
+
+Análisis de resultados
+- Base esperada: sitio estático (Vite) debería ofrecer p95 de latencia muy bajo en Home y puntajes Lighthouse altos; los umbrales están como avisos para iterar sin bloquear.
+- Los reportes quedan adjuntos por ejecución; permiten detectar regresiones de rendimiento o accesibilidad entre commits.
+
+Notas:
+- Ambos jobs trabajan sobre la build local para resultados reproducibles en PRs.
+- Si se requiere probar contra un dominio público (Vercel/Pages), se puede extender el plan JMeter con variables de host y protocolo.
+
+## 9. Pruebas de Aceptación
+
+Esta fase valida que lo entregado cumple con los criterios funcionales y de calidad acordados (alineados a ISO/IEC 25010). Se compone de cuatro pasos:
+
+1) Pruebas de Aceptación (ejecución de flujos principales)
+- Navegación por Sidebar y rutas clave: Home, Robot 3D, Ciclo del Agua, Paleta de Colores.
+- Interacciones esenciales: cambio de tema, controles de robot, etapas del ciclo del agua, selección de color/modelo.
+- Respuesta perceptible < 200 ms en acciones clave.
+
+2) Checklist de criterios de aceptación
+- [ ] Contraste cumple umbrales (texto normal ≥ 4.5:1; grande ≥ 3:1)
+- [ ] Foco visible y orden lógico de tabulación en todos los controles
+- [ ] Navegación completada solo con teclado (Tab/Shift+Tab/Enter/Espacio/Escape)
+- [ ] Labels y nombre accesible correctos; regiones semánticas nav/main/header
+- [ ] Estados hover/focus/active consistentes en todos los botones/links
+- [ ] Tiempos por tarea ≤ 2 min para 3 flujos representativos
+
+3) Validación de cumplimiento funcional y de calidad
+- Ejecutar la suite de pruebas: unitarias + integración (Jest)
+- Opcional: correr Lighthouse (workflow perf-lighthouse) y adjuntar reporte
+- Registrar evidencia (capturas/gifs breves) de los flujos críticos
+
+4) Observaciones y mejoras
+- Documentar hallazgos (críticos/serios/menores) y proponer acciones
+- Crear issues por cada hallazgo con prioridad y criterios de cierre
+
+Plantilla de evidencia mínima
+- Caso probado, pasos, resultado esperado/obtenido, capturas y enlace a reporte (Lighthouse/JMeter)
+
+Cómo se aplicó
+- Se derivaron los criterios desde la sección de Requisitos No Funcionales (ISO/IEC 25010) y de los flujos educativos principales.
+- Se combinaron evidencias automáticas (tests e informes) con verificación manual guiada por checklist.
+
+Cómo se integró
+- Las evidencias automáticas provienen de los jobs de CI y de los workflows de sistema; las manuales se anexan en issues o PRs.
+
+Análisis de resultados
+- Las pruebas automatizadas confirman el comportamiento esperado en flujos clave; el checklist ayuda a mantener foco en contraste, foco visible y teclado.
+- Pendiente de ampliar con pruebas de lector de pantalla y cobertura completa de teclado en todas las vistas.
+
+## 10. Pruebas de Implantación (Post-Deploy)
+
+Verifican que el despliegue esté sano y que las funcionalidades operen en el entorno público (GitHub Pages o Vercel).
+
+1) Verificación del despliegue
+- Confirmar build exitoso y URL pública disponible
+- Comprobar respuesta 200 en la Home y recursos principales (HTML/CSS/JS)
+- Revisar consola del navegador: sin errores bloqueantes
+
+2) Comprobación de funcionalidades en producción
+- Navegación por todas las rutas; sin enlaces rotos ni 404
+- Tema claro/oscuro persistente entre recargas
+- Vistas 3D renderizan sin errores de WebGL en dispositivos de referencia
+- Ciclo del Agua: etapas, reproducción automática y reinicio
+- Paleta de Colores: presets, HEX válido y conmutación de modelo
+
+3) Auditorías rápidas en producción (opcional)
+- Lighthouse en la URL pública (Performance/A11y/Best Practices/SEO)
+- Comparar contra umbrales del repositorio; registrar deriva si la hay
+
+4) Registro de observaciones y plan de mejora
+- Abrir issues con prioridad y responsable
+- Anotar regresiones respecto a entorno local/preview
+
+Cómo se aplicó
+- Se definió un procedimiento de smoke tests posterior al despliegue (Pages o Vercel) centrado en disponibilidad, navegación y errores en consola.
+
+Cómo se integró
+- El workflow de Pages automatiza la construcción y publicación; tras cada deploy se sugiere ejecutar rápidamente Lighthouse sobre la URL pública.
+
+Análisis de resultados
+- Al trabajar con artefactos estáticos, los riesgos típicos son rutas/base y caché del navegador. El procedimiento mitiga estos casos y permite registrar regresiones visuales/funcionales.

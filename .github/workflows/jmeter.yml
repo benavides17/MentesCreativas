@@ -1,0 +1,77 @@
+name: perf-jmeter
+
+on:
+  workflow_dispatch:
+    inputs:
+      users:
+        description: "Concurrent users"
+        required: false
+        default: "20"
+      ramp:
+        description: "Ramp-up seconds"
+        required: false
+        default: "20"
+      duration:
+        description: "Test duration seconds"
+        required: false
+        default: "60"
+
+jobs:
+  jmeter:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Build site
+        run: npm run build
+
+      - name: Serve dist locally
+        run: |
+          npx http-server ./dist -p 8080 &
+          npx wait-on http://localhost:8080
+
+      - name: Install JMeter
+        run: |
+          JM_VERSION=5.6.3
+          curl -L -o jmeter.tgz https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-${JM_VERSION}.tgz
+          tar -xzf jmeter.tgz
+          echo "JMETER_HOME=$PWD/apache-jmeter-${JM_VERSION}" >> $GITHUB_ENV
+
+      - name: Run JMeter test plan
+        env:
+          USERS: ${{ github.event.inputs.users || '20' }}
+          RAMP: ${{ github.event.inputs.ramp || '20' }}
+          DURATION: ${{ github.event.inputs.duration || '60' }}
+        run: |
+          "$JMETER_HOME/bin/jmeter" -n \
+            -t perf/jmeter-test.jmx \
+            -Jprotocol=http -JtargetHost=localhost \
+            -Jusers=${USERS} -Jramp=${RAMP} -Jduration=${DURATION} \
+            -l perf/jmeter-results.jtl
+
+      - name: Upload JMeter results
+        uses: actions/upload-artifact@v4
+        with:
+          name: jmeter-results
+          path: perf/jmeter-results.jtl
+
+      - name: Summarize results
+        if: always()
+        run: |
+          SUMMARY=$(node scripts/parse-jmeter.js perf/jmeter-results.jtl || echo "No results to summarize.")
+          echo "${SUMMARY}" >> $GITHUB_STEP_SUMMARY
