@@ -6,8 +6,8 @@ export default function Robot3DView() {
     <div className="max-w-6xl mx-auto space-y-4">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div>
-          <h2 className="text-xl font-semibold tracking-tight text-slate-700 dark:text-slate-100">Robot 3D</h2>
-          <p className="text-xs md:text-sm text-slate-600 dark:text-slate-200">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-800 dark:text-slate-100">Robot 3D</h2>
+          <p className="text-xs md:text-sm text-slate-600 dark:text-slate-300">
             Rotar: arrastre izquierdo · Zoom: rueda/pinch · Desplazar: botón derecho / Shift+arrastre
           </p>
         </div>
@@ -42,7 +42,7 @@ export default function Robot3DView() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-sky-200 dark:border-slate-800/60 bg-sky-50/50 dark:bg-slate-900/20 shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-sky-100 dark:border-slate-800/60 bg-white/70 dark:bg-slate-900/20 shadow-sm overflow-hidden">
         <Robot3D />
       </div>
 

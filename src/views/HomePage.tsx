@@ -24,8 +24,8 @@ export default function HomeContent() {
   return (
     <main
       className="flex flex-col items-center justify-center text-center py-16 px-6 
-                 bg-sky-100
-                 text-slate-500 dark:text-slate-100 
+                 bg-transparent
+                 text-slate-800 dark:text-slate-100 
                  font-sans min-h-[calc(100vh-3.5rem)] 
                  transition-colors duration-500"
       role="main"
@@ -36,7 +36,7 @@ export default function HomeContent() {
         transition={{ duration: 1 }}
         className="w-full max-w-3xl"
       >
-  <div className="relative rounded-3xl border border-sky-200/60 shadow-lg bg-sky-50/80 backdrop-blur-sm dark:bg-slate-900/60 dark:border-slate-800/60 px-8 py-10">
+  <div className="relative rounded-3xl border border-sky-100/70 shadow-lg bg-white/85 backdrop-blur-sm dark:bg-slate-900/60 dark:border-slate-800/60 px-8 py-10">
         {/* --- SVG accesible --- */}
         <svg
           className="w-32 h-32 mx-auto mb-6"
@@ -86,7 +86,7 @@ export default function HomeContent() {
             Ver más
           </button>
         </div>
-        <span className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-slate-900/10 dark:ring-white/10" />
+  <span className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-sky-100/60 dark:ring-white/10" />
         </div>
       </motion.div>
     </main>

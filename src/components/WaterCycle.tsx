@@ -29,7 +29,7 @@ export default function WaterCycle() {
   }, [idx]);
 
   return (
-    <div className="bg-gray-400 p-4 rounded shadow">
+  <div className="bg-white dark:bg-slate-900 p-4 rounded shadow transition-colors border border-sky-100 dark:border-slate-800">
       {/* Animaciones CSS locales para el SVG */}
       <style>{`
         @keyframes rise { 0%{ transform: translateY(8px); opacity:.2 } 100%{ transform: translateY(-14px); opacity:1 } }
@@ -43,20 +43,23 @@ export default function WaterCycle() {
       `}</style>
 
       <div className="md:flex gap-4 items-start">
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold">{steps[idx].title}</h3>
-          <p className="mt-2 text-sm text-slate-900">{steps[idx].text}</p>
-
-          <div className="mt-4 flex gap-2 flex-wrap">
+         <div className="mt-4 flex gap-2 flex-wrap">
+            
             <button onClick={() => { setPlaying(false); setIdx((i) => Math.max(0, i - 1)); }} className="px-3 py-1.5 rounded border">Anterior</button>
             <button onClick={() => setPlaying((p) => !p)} className={`px-3 py-1.5 rounded ${playing ? 'bg-red-500 text-white' : 'border'}`}>{playing ? 'Pausar' : 'Reproducir'}</button>
             <button onClick={() => { setPlaying(false); setIdx((i) => Math.min(steps.length - 1, i + 1)); }} className="px-3 py-1.5 rounded border">Siguiente</button>
             <button onClick={() => { setPlaying(false); setIdx(0); }} className="px-3 py-1.5 rounded border">Reiniciar</button>
           </div>
         </div>
+        
+        <div className="flex-1">
+          <h3 className="text-lg font-semibold">{steps[idx].title}</h3>
+          <p className="mt-2 text-sm text-slate-800 dark:text-slate-300">{steps[idx].text}</p>
+
+         
 
         <div className="w-full md:w-80 mt-4 md:mt-0">
-          <div className="border rounded p-2 bg-white/70">
+          <div className="border border-sky-100 dark:border-slate-800 rounded p-2 bg-white/80 dark:bg-slate-900/40">
             <svg viewBox="0 0 240 160" className="w-full h-44">
               {/* Agua acumulada */}
               <rect x="0" y="120" width="240" height="40" fill="#60a5fa" opacity={idx === 3 ? 1 : 0.7} />

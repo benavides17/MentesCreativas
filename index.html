@@ -5,9 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mentes Creativas</title>
     <link rel="icon" type="image/svg+xml" href="/mentesIcon.svg" />
+    <script>
+      // Evitar parpadeo de tema: aplica 'dark' según preferencia guardada o del sistema antes de pintar
+      (function() {
+        try {
+          var saved = localStorage.getItem('theme');
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (saved === 'dark' || (!saved && prefersDark)) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) { /* noop */ }
+      })();
+    </script>
   </head>
 
-  <body class="transition-colors duration-500 bg-sky-100 dark:bg-slate-500 text-slate-500 dark:text-slate-100 min-h-screen">
+  <body class="transition-colors duration-500 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen">
     <div id="app"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

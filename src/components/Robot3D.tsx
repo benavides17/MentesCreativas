@@ -23,7 +23,9 @@ export default function Robot3D() {
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(stage.clientWidth, stage.clientHeight);
-    renderer.setClearColor(0xf8fafc, 1);
+  // clear color adaptado al tema
+  const getClear = () => (document.documentElement.classList.contains('dark') ? 0x0f172a : 0xf1f5f9);
+  renderer.setClearColor(getClear(), 1);
     stage.appendChild(renderer.domElement);
 
     // Scene & Camera
@@ -227,6 +229,11 @@ export default function Robot3D() {
     window.addEventListener("robot3d-move", onMove as EventListener);
 
     // cleanup
+    const onTheme = () => {
+      renderer.setClearColor(getClear(), 1);
+    };
+    document.addEventListener('theme:changed', onTheme as EventListener);
+
     return () => {
       running = false;
       if (animationHandle.current) cancelAnimationFrame(animationHandle.current);
@@ -249,9 +256,10 @@ export default function Robot3D() {
       controls.dispose();
       renderer.dispose();
       ro.disconnect();
+      document.removeEventListener('theme:changed', onTheme as EventListener);
   try { stage.removeChild(renderer.domElement); } catch { /* noop */ }
     };
   }, [isWaving, speed]);
 
-  return <div ref={stageRef} className="w-full h-[520px] border bg-gray-500" aria-label="Visor Robot 3D" />;
+  return <div ref={stageRef} className="w-full h-[520px] border bg-sky-100 dark:bg-slate-900 transition-colors" aria-label="Visor Robot 3D" />;
 }

@@ -1,7 +1,9 @@
 // src/components/Navbar.tsx
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 const Navbar: React.FC = () => {
+  const [isDark, setIsDark] = useState<boolean>(false);
+
   // --- Inicializa el tema al cargar (mantiene preferencia del usuario) ---
   useEffect(() => {
     const root = document.documentElement;
@@ -21,6 +23,16 @@ const Navbar: React.FC = () => {
       root.classList.remove("dark");
       localStorage.setItem("theme", "light");
     }
+    const nowDark = saved === "dark" || (!saved && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    setIsDark(nowDark);
+
+    const onThemeChanged = () => {
+      // sincroniza estado si el cambio viene de otro lugar
+      const savedNow = localStorage.getItem("theme");
+      setIsDark(savedNow === "dark");
+    };
+    document.addEventListener("theme:changed", onThemeChanged);
+    return () => document.removeEventListener("theme:changed", onThemeChanged);
   }, []);
 
   // --- Alterna entre claro / oscuro ---
@@ -37,12 +49,13 @@ const Navbar: React.FC = () => {
       localStorage.setItem("theme", "dark");
       document.dispatchEvent(new CustomEvent("theme:changed", { detail: { theme: "dark" } }));
     }
+    setIsDark(!isDark);
   };
 
   return (
     <header
-      className="h-14 sticky top-0 z-20 backdrop-blur-md supports-[backdrop-filter]:bg-sky-50/60 dark:supports-[backdrop-filter]:bg-sky-800/60
-                 bg-sky-50/80 dark:bg-sky-800 border-b border-sky-200 dark:border-sky-900 shadow-sm
+      className="h-14 sticky top-0 z-20 backdrop-blur-md supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-sky-800/60
+                 bg-white/80 dark:bg-sky-800 border-b border-sky-100 dark:border-sky-900 shadow-sm
                  text-slate-900 dark:text-slate-100 transition-colors duration-500"
       role="banner"
     >
@@ -66,12 +79,13 @@ const Navbar: React.FC = () => {
             type="button"
             onClick={toggleTheme}
             aria-label="Cambiar entre modo claro y oscuro"
+            aria-pressed={isDark}
             className="relative px-4 py-2 rounded-xl font-medium bg-blue-600 text-white
                        hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300/50
                        active:scale-95 dark:bg-blue-500 dark:text-white dark:hover:bg-blue-600
                        dark:focus:ring-blue-400/50 transition-colors duration-300 shadow-sm"
           >
-            <span className="inline-block">Tema</span>
+            <span className="inline-block">{isDark ? "Oscuro" : "Claro"}</span>
             <span className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-blue-900/10 dark:ring-white/10" />
           </button>
         </nav>

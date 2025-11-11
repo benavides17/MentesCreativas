@@ -32,8 +32,8 @@ export default function Sidebar() {
       to={route}
       className={({ isActive }) =>
         `block w-full text-left rounded-lg pl-4 pr-3 py-2 text-slate-700 dark:text-slate-200
-         hover:bg-sky-100 dark:hover:bg-slate-800 min-h-[40px] transition-colors
-         ${isActive ? "bg-sky-200/70 text-slate-900 dark:bg-slate-800 dark:text-white" : ""}`
+         hover:bg-sky-50 dark:hover:bg-slate-800 min-h-[40px] transition-colors
+         ${isActive ? "bg-sky-100 text-slate-900 dark:bg-slate-800 dark:text-white" : ""}`
       }
     >
       <div className="flex items-center gap-2 whitespace-normal">
@@ -44,15 +44,15 @@ export default function Sidebar() {
   );
 
   return (
-    <aside className="hidden md:block w-full md:w-[240px] border-r border-sky-200 dark:border-slate-800 bg-sky-100/90 dark:bg-slate-900/60 backdrop-blur-sm">
+    <aside className="hidden md:block w-full md:w-[240px] border-r border-sky-100 dark:border-slate-800 bg-sky-50/90 dark:bg-slate-900/60 backdrop-blur-sm">
       <div className="p-3 space-y-1">
 
         {/* Acordeón Main Items */}
         <button
           onClick={() => setOpenMain(!openMain)}
           aria-expanded={openMain}
-          className="w-full text-left flex items-center justify-between rounded-lg px-3 py-2 text-slate-900 dark:text-slate-900
-                     hover:bg-slate-700/40 dark:hover:bg-teal-500/40 font-medium transition-colors duration-300"
+          className="w-full text-left flex items-center justify-between rounded-lg px-3 py-2 text-slate-800 dark:text-slate-200
+                     hover:bg-sky-50 dark:hover:bg-slate-800 font-medium transition-colors duration-300"
         >
           <span className="text-sm font-semibold tracking-wide">Menú Principal</span>
           <span className="text-xs opacity-70">{openMain ? "▲" : "▼"}</span>
