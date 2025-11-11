@@ -61,7 +61,7 @@ jobs:
           "$JMETER_HOME/bin/jmeter" -n \
             -t perf/jmeter-test.jmx \
             -Jprotocol=http -JtargetHost=localhost \
-            -Jusers=${USERS} -Jramp=${RAMP} -Jduration=${DURATION} \
+            -Jusers=${USERS} -Jramp=${RAMP} -Jduration=${DURATION} -Jport=8080 \
             -l perf/jmeter-results.jtl
 
       - name: Upload JMeter results

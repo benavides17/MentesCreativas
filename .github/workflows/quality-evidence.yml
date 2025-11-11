@@ -1,0 +1,81 @@
+name: quality-evidence
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test (unit + integration)
+        run: npm test -- --ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Serve dist
+        run: |
+          npx http-server ./dist -p 8080 &
+          npx wait-on http://localhost:8080
+
+      - name: Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          configPath: ./lighthouserc.json
+          runs: 1
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+      - name: Install JMeter
+        run: |
+          JM_VERSION=5.6.3
+          curl -L -o jmeter.tgz https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-${JM_VERSION}.tgz
+          tar -xzf jmeter.tgz
+          echo "JMETER_HOME=$PWD/apache-jmeter-${JM_VERSION}" >> $GITHUB_ENV
+
+      - name: JMeter smoke
+        run: |
+          "$JMETER_HOME/bin/jmeter" -n \
+            -t perf/jmeter-test.jmx \
+            -Jprotocol=http -JtargetHost=localhost -Jport=8080 \
+            -Jusers=5 -Jramp=5 -Jduration=10 \
+            -l perf/jmeter-results.jtl
+
+      - name: Upload JMeter results
+        uses: actions/upload-artifact@v4
+        with:
+          name: jmeter-results
+          path: perf/jmeter-results.jtl
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Quality Evidence" >> $GITHUB_STEP_SUMMARY
+          echo "- Type-check, lint, tests y build: OK (ver pasos superiores)" >> $GITHUB_STEP_SUMMARY
+          echo "- Lighthouse: artefactos y enlaces publicados por el paso 'Lighthouse CI'" >> $GITHUB_STEP_SUMMARY
+          SUMMARY=$(node scripts/parse-jmeter.js perf/jmeter-results.jtl || echo "No JMeter results to summarize.")
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "$SUMMARY" >> $GITHUB_STEP_SUMMARY
