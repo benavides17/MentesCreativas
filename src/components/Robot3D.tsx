@@ -8,10 +8,12 @@ export default function Robot3D() {
   const partsRef = useRef<Record<string, THREE.Mesh>>({});
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const animationHandle = useRef<number | null>(null);
+  const moveBounds = useRef<{ x: [number, number]; z: [number, number] }>({ x: [-3, 3], z: [-3, 3] });
 
   // simple state for waving animation
   const [isWaving, setIsWaving] = useState(false);
   const [speed, setSpeed] = useState(1);
+  const moveStep = useRef(0.15);
 
   useEffect(() => {
     if (!stageRef.current) return;
@@ -193,6 +195,37 @@ export default function Robot3D() {
     const ro = new ResizeObserver(onResize);
     ro.observe(stage);
 
+    // Movement via keyboard
+    const move = (dir: "forward" | "back" | "left" | "right") => {
+      if (!meshRef.current) return;
+      const g = meshRef.current;
+      const step = moveStep.current * speed;
+      if (dir === "forward") g.position.z -= step;
+      if (dir === "back") g.position.z += step;
+      if (dir === "left") g.position.x -= step;
+      if (dir === "right") g.position.x += step;
+      // clamp to bounds
+      const b = moveBounds.current;
+      g.position.x = Math.max(b.x[0], Math.min(b.x[1], g.position.x));
+      g.position.z = Math.max(b.z[0], Math.min(b.z[1], g.position.z));
+    };
+
+    const onKey = (ev: KeyboardEvent) => {
+      if (ev.key === "ArrowUp" || ev.key.toLowerCase() === "w") move("forward");
+      if (ev.key === "ArrowDown" || ev.key.toLowerCase() === "s") move("back");
+      if (ev.key === "ArrowLeft" || ev.key.toLowerCase() === "a") move("left");
+      if (ev.key === "ArrowRight" || ev.key.toLowerCase() === "d") move("right");
+    };
+
+    const onMove = (ev: CustomEvent) => {
+      const dir = (ev.detail as any)?.dir as "forward" | "back" | "left" | "right";
+      if (!dir) return;
+      move(dir);
+    };
+
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("robot3d-move", onMove as EventListener);
+
     // cleanup
     return () => {
       running = false;
@@ -202,6 +235,8 @@ export default function Robot3D() {
       window.removeEventListener("robot3d-wave", onWaveToggle as EventListener);
       window.removeEventListener("robot3d-speed", onSpeed as EventListener);
       window.removeEventListener("robot3d-pose", onPose as EventListener);
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("robot3d-move", onMove as EventListener);
       if (meshRef.current) {
         meshRef.current.traverse((c: any) => {
           if (c.geometry) c.geometry.dispose();
@@ -214,7 +249,7 @@ export default function Robot3D() {
       controls.dispose();
       renderer.dispose();
       ro.disconnect();
-      try { stage.removeChild(renderer.domElement); } catch {}
+  try { stage.removeChild(renderer.domElement); } catch { /* noop */ }
     };
   }, [isWaving, speed]);
 

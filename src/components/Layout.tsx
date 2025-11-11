@@ -1,5 +1,5 @@
-import { Outlet } from "react-router-dom";
-import Sidebar from "./Sidebar";
+import { Outlet } from "react-router-dom" ;
+import Sidebar from "./Sidebar";    
 import Navbar from "./Navbar";
 
 export default function Layout() {
@@ -14,7 +14,7 @@ export default function Layout() {
         <Navbar />
 
         {/* Contenido dinámico (cada vista) */}
-        <main className="flex-1 overflow-y-auto p-4 bg-slate-900 dark:bg-emerald-600">
+        <main className="flex-1 overflow-y-auto p-6 md:p-8 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-teal-600 dark:via-teal-700 dark:to-teal-600">
           <Outlet />
         </main>
       </div>

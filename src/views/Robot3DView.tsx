@@ -3,46 +3,78 @@ import Robot3D from "../components/Robot3D";
 
 export default function Robot3DView() {
   return (
-    <div className="space-y-4 p-4">
-      <div className="flex items-center justify-between">
+    <div className="max-w-6xl mx-auto space-y-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div>
-          <h2 className="text-lg font-medium">Robot 3D</h2>
-          <p className="text-sm text-slate-900">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-100">Robot 3D</h2>
+          <p className="text-xs md:text-sm text-slate-200">
             Rotar: arrastre izquierdo · Zoom: rueda/pinch · Desplazar: botón derecho / Shift+arrastre
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button 
             onClick={() => window.dispatchEvent(new CustomEvent("robot3d-setview", { detail: "front" }))} 
-            className="px-3 py-1.5 rounded border hover:bg-slate-500"
+            className="px-3 py-1.5 rounded-lg border border-slate-300/40 bg-white/70 hover:bg-white/90 text-slate-700 shadow-sm backdrop-blur-sm transition dark:bg-slate-900/60 dark:text-slate-200 dark:hover:bg-slate-900/80"
           >
             Frontal
           </button>
           <button 
             onClick={() => window.dispatchEvent(new CustomEvent("robot3d-setview", { detail: "side" }))} 
-            className="px-3 py-1.5 rounded border hover:bg-slate-500"
+            className="px-3 py-1.5 rounded-lg border border-slate-300/40 bg-white/70 hover:bg-white/90 text-slate-700 shadow-sm backdrop-blur-sm transition dark:bg-slate-900/60 dark:text-slate-200 dark:hover:bg-slate-900/80"
           >
             Lateral
           </button>
           <button 
             onClick={() => window.dispatchEvent(new CustomEvent("robot3d-setview", { detail: "top" }))} 
-            className="px-3 py-1.5 rounded border hover:bg-slate-500"
+            className="px-3 py-1.5 rounded-lg border border-slate-300/40 bg-white/70 hover:bg-white/90 text-slate-700 shadow-sm backdrop-blur-sm transition dark:bg-slate-900/60 dark:text-slate-200 dark:hover:bg-slate-900/80"
           >
             Superior
           </button>
           <button 
             onClick={() => window.dispatchEvent(new CustomEvent("robot3d-setview", { detail: "perspective" }))} 
-            className="px-3 py-1.5 rounded border hover:bg-slate-500"
+            className="px-3 py-1.5 rounded-lg border border-slate-300/40 bg-white/70 hover:bg-white/90 text-slate-700 shadow-sm backdrop-blur-sm transition dark:bg-slate-900/60 dark:text-slate-200 dark:hover:bg-slate-900/80"
           >
             Perspectiva
           </button>
-          <Link to="/" className="px-3 py-1.5 rounded bg-emerald-600 hover:bg-emerald-700 text-dark">
+          <Link to="/" className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition">
             Volver al inicio
           </Link>
         </div>
       </div>
 
-      <Robot3D />
+      <div className="rounded-2xl border border-slate-200/40 dark:border-slate-800/60 bg-white/5 dark:bg-slate-900/20 shadow-sm overflow-hidden">
+        <Robot3D />
+      </div>
+
+      {/* Controles de movimiento en línea recta y lateral */}
+      <div className="grid grid-cols-3 gap-2 max-w-xs mx-auto">
+        <div />
+        <button
+          onClick={() => window.dispatchEvent(new CustomEvent("robot3d-move", { detail: { dir: "forward" } }))}
+          className="px-3 py-2 rounded-lg border border-slate-300/40 bg-white/70 hover:bg-white/90 text-slate-700 shadow-sm backdrop-blur-sm transition dark:bg-slate-900/60 dark:text-slate-200 dark:hover:bg-slate-900/80"
+        >
+          ↑
+        </button>
+        <div />
+        <button
+          onClick={() => window.dispatchEvent(new CustomEvent("robot3d-move", { detail: { dir: "left" } }))}
+          className="px-3 py-2 rounded-lg border border-slate-300/40 bg-white/70 hover:bg-white/90 text-slate-700 shadow-sm backdrop-blur-sm transition dark:bg-slate-900/60 dark:text-slate-200 dark:hover:bg-slate-900/80"
+        >
+          ←
+        </button>
+        <button
+          onClick={() => window.dispatchEvent(new CustomEvent("robot3d-move", { detail: { dir: "back" } }))}
+          className="px-3 py-2 rounded-lg border border-slate-300/40 bg-white/70 hover:bg-white/90 text-slate-700 shadow-sm backdrop-blur-sm transition dark:bg-slate-900/60 dark:text-slate-200 dark:hover:bg-slate-900/80"
+        >
+          ↓
+        </button>
+        <button
+          onClick={() => window.dispatchEvent(new CustomEvent("robot3d-move", { detail: { dir: "right" } }))}
+          className="px-3 py-2 rounded-lg border border-slate-300/40 bg-white/70 hover:bg-white/90 text-slate-700 shadow-sm backdrop-blur-sm transition dark:bg-slate-900/60 dark:text-slate-200 dark:hover:bg-slate-900/80"
+        >
+          →
+        </button>
+      </div>
     </div>
   );
 }

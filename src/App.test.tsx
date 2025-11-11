@@ -1,7 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import App from "./App";
 
-test("renderiza el título principal", () => {
+test("renderiza el título principal", async () => {
   render(<App />);
-  expect(screen.getByText(/Bienvenido a React/i)).toBeInTheDocument();
+  const el = await screen.findByText(/Bienvenido a React/i, {}, { timeout: 3000 });
+  expect(el).toBeInTheDocument();
 });

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { FaHome, FaCalculator, FaRuler, FaKey, FaPalette, FaRobot, FaTint } from "react-icons/fa";
+import { FaHome, FaPalette, FaRobot, FaTint } from "react-icons/fa";
 
 interface SidebarItem {
   label: string;
@@ -44,28 +44,30 @@ export default function Sidebar() {
   );
 
   return (
-    <aside className="hidden md:block w-full md:w-[240px] border-r border-slate-900 dark:border-slate-900 bg-slate-600 dark:bg-teal-600">
+    <aside className="hidden md:block w-full md:w-[240px] border-r border-slate-900 dark:border-slate-900 bg-slate-600 dark:bg-teal-600/90 backdrop-blur-sm">
       <div className="p-3 space-y-1">
 
         {/* Acordeón Main Items */}
         <button
           onClick={() => setOpenMain(!openMain)}
-          className="w-full text-left flex items-center justify-between rounded-lg px-3 py-2 texttext-slate-900 dark:text-slate-900 
-                     hover:bg-slate-900 dark:hover:bg-slate-500 font-medium"
+          aria-expanded={openMain}
+          className="w-full text-left flex items-center justify-between rounded-lg px-3 py-2 text-slate-900 dark:text-slate-900
+                     hover:bg-slate-700/40 dark:hover:bg-teal-500/40 font-medium transition-colors duration-300"
         >
-          Menú Principal
-          <span>{openMain ? "▲" : "▼"}</span>
+          <span className="text-sm font-semibold tracking-wide">Menú Principal</span>
+          <span className="text-xs opacity-70">{openMain ? "▲" : "▼"}</span>
         </button>
         {openMain && <div className="pl-4 space-y-1">{mainItems.map(renderNavItem)}</div>}
 
         {/* Acordeón Exercises */}
         <button
           onClick={() => setOpenExercises(!openExercises)}
-          className="w-full text-left flex items-center justify-between rounded-lg px-3 py-2 text-slate-600 dark:text-slate-900 
-                     hover:bg-slate-50 dark:hover:bg-slate-500 font-medium"
+          aria-expanded={openExercises}
+          className="w-full text-left flex items-center justify-between rounded-lg px-3 py-2 text-slate-100 dark:text-slate-900
+                     hover:bg-slate-50/20 dark:hover:bg-teal-500/40 font-medium transition-colors duration-300"
         >
-          Ejercicios - Jtest
-          <span>{openExercises ? "▲" : "▼"}</span>
+          <span className="text-sm font-semibold tracking-wide">Ejercicios · Jtest</span>
+          <span className="text-xs opacity-70">{openExercises ? "▲" : "▼"}</span>
         </button>
         {openExercises && <div className="pl-4 space-y-1">{exerciseItems.map(renderNavItem)}</div>}
 

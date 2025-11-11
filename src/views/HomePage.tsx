@@ -5,10 +5,11 @@ export default function HomeContent() {
   // --- Auditoría opcional: se ejecuta solo si axe-core está disponible ---
   useEffect(() => {
     (async () => {
-      if ((import.meta as any).env.DEV) { // Solo en modo desarrollo
+      // Evitamos import.meta para compatibilidad con Jest/ts-jest
+      if (process.env.NODE_ENV === "development") {
         try {
           const axe = await import("axe-core");
-          axe.run(document, {}, (err, results) => {
+          axe.run(document, {}, (_err, results) => {
             if (results.violations.length > 0) {
               console.warn("⚠️ Violaciones de accesibilidad:", results.violations);
             }
@@ -33,7 +34,9 @@ export default function HomeContent() {
         initial={{ y: -30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 1 }}
+        className="w-full max-w-3xl"
       >
+        <div className="relative rounded-3xl border border-slate-200/60 shadow-lg bg-white/80 backdrop-blur-sm dark:bg-slate-900/60 dark:border-slate-800/60 px-8 py-10">
         {/* --- SVG accesible --- */}
         <svg
           className="w-32 h-32 mx-auto mb-6"
@@ -82,6 +85,8 @@ export default function HomeContent() {
           >
             Ver más
           </button>
+        </div>
+        <span className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-slate-900/10 dark:ring-white/10" />
         </div>
       </motion.div>
     </main>

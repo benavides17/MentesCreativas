@@ -41,27 +41,23 @@ const Navbar: React.FC = () => {
 
   return (
     <header
-      className="h-14 sticky top-0 z-10 backdrop-blur border-b 
-                 bg-white/80 dark:bg-teal-600 
-                 border-slate-200 dark:border-slate-900
-                 text-slate-900 dark:text-slate-900
-                 transition-colors duration-500"
+      className="h-14 sticky top-0 z-20 backdrop-blur-md supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-teal-600/60
+                 bg-white/80 dark:bg-teal-600 border-b border-slate-200 dark:border-teal-700 shadow-sm
+                 text-slate-900 dark:text-slate-900 transition-colors duration-500"
       role="banner"
     >
-      <div className="container mx-auto px-4 h-full flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
         {/* --- Lado izquierdo: logo + marca --- */}
         <div
-          className="flex items-center gap-2 font-semibold select-none"
+          className="flex items-center gap-2 font-semibold select-none tracking-tight"
           aria-label="Marca institucional"
         >
           <div
-            className="inline-flex items-center justify-center w-8 h-8 rounded-lg 
-                       bg-emerald-600 text-white font-bold shadow-sm
-                       dark:bg-emerald-500"
+            className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-emerald-600 text-white font-bold shadow-sm shadow-emerald-600/30 dark:bg-emerald-500"
           >
             U
           </div>
-          <span className="tracking-tight">UCC · Prácticas Desarrollo</span>
+          <span className="text-sm md:text-base">UCC · Prácticas Desarrollo</span>
         </div>
 
         {/* --- Lado derecho: botón de tema --- */}
@@ -70,16 +66,13 @@ const Navbar: React.FC = () => {
             type="button"
             onClick={toggleTheme}
             aria-label="Cambiar entre modo claro y oscuro"
-            className="px-4 py-2 rounded-xl font-medium transition
-                       bg-slate-900 text-white 
-                       hover:bg-slate-800 focus:outline-none 
-                       focus:ring-4 focus:ring-slate-400/50 
-                       active:scale-95
-                       dark:bg-slate-100 dark:text-slate-900 
-                       dark:hover:bg-slate-200 dark:focus:ring-slate-500/50
-                       transition-colors duration-300"
+            className="relative px-4 py-2 rounded-xl font-medium bg-slate-900 text-white
+                       hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-400/50
+                       active:scale-95 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200
+                       dark:focus:ring-slate-500/50 transition-colors duration-300 shadow-sm"
           >
-            Tema
+            <span className="inline-block">Tema</span>
+            <span className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-slate-900/10 dark:ring-slate-300/30" />
           </button>
         </nav>
       </div>

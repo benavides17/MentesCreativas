@@ -30,6 +30,18 @@ export default function WaterCycle() {
 
   return (
     <div className="bg-gray-400 p-4 rounded shadow">
+      {/* Animaciones CSS locales para el SVG */}
+      <style>{`
+        @keyframes rise { 0%{ transform: translateY(8px); opacity:.2 } 100%{ transform: translateY(-14px); opacity:1 } }
+        @keyframes fall { 0%{ transform: translateY(-10px); opacity:.2 } 100%{ transform: translateY(18px); opacity:1 } }
+        @keyframes steam { 0%{ opacity:.2 } 50%{ opacity:.6 } 100%{ opacity:1 } }
+        @keyframes drift { 0%{ transform: translateX(-4px) } 100%{ transform: translateX(4px) } }
+        .evap-arrow { animation: rise 1.4s infinite ease-in; }
+        .precip-drop { animation: fall 1.1s infinite ease-in; }
+        .steam { animation: steam 2s infinite ease-in-out; }
+        .cloud { animation: drift 6s infinite ease-in-out alternate; }
+      `}</style>
+
       <div className="md:flex gap-4 items-start">
         <div className="flex-1">
           <h3 className="text-lg font-semibold">{steps[idx].title}</h3>
@@ -43,20 +55,43 @@ export default function WaterCycle() {
           </div>
         </div>
 
-        <div className="w-full md:w-64 mt-4 md:mt-0">
-          <div className="border rounded p-2">
-            <svg viewBox="0 0 200 140" className="w-full h-36">
-              <rect x="0" y="110" width="200" height="30" fill="#60a5fa" opacity={idx === 3 ? 1 : 0.7} />
-              <circle cx="160" cy="20" r="16" fill="#f59e0b" opacity={idx === 0 ? 1 : 0.6} />
-              <g opacity={idx === 1 ? 1 : 0.6}>
-                <ellipse cx="80" cy="40" rx="36" ry="14" fill="#eef6ff" />
-                <ellipse cx="110" cy="40" rx="26" ry="12" fill="#eef6ff" />
+        <div className="w-full md:w-80 mt-4 md:mt-0">
+          <div className="border rounded p-2 bg-white/70">
+            <svg viewBox="0 0 240 160" className="w-full h-44">
+              {/* Agua acumulada */}
+              <rect x="0" y="120" width="240" height="40" fill="#60a5fa" opacity={idx === 3 ? 1 : 0.7} />
+              {/* Sol */}
+              <circle cx="200" cy="28" r="16" fill="#f59e0b" opacity={idx === 0 ? 1 : 0.6} />
+              {/* Vapor (evaporación) */}
+              {idx === 0 && (
+                <g className="steam" fill="#93c5fd">
+                  <path className="evap-arrow" style={{ animationDelay: "0ms" }} d="M40 120 l6 -12 l6 12" />
+                  <path className="evap-arrow" style={{ animationDelay: "200ms" }} d="M70 120 l6 -12 l6 12" />
+                  <path className="evap-arrow" style={{ animationDelay: "400ms" }} d="M100 120 l6 -12 l6 12" />
+                </g>
+              )}
+
+              {/* Nubes (condensación) */}
+              <g className={idx === 1 ? "cloud" : ""} opacity={idx >= 1 ? 1 : 0.5}>
+                <ellipse cx="90" cy="50" rx="36" ry="14" fill="#eef6ff" />
+                <ellipse cx="120" cy="50" rx="26" ry="12" fill="#eef6ff" />
+                <ellipse cx="150" cy="50" rx="20" ry="10" fill="#eef6ff" />
               </g>
+
+              {/* Precipitación */}
               {idx === 2 && (
                 <g fill="#3b82f6">
-                  <path d="M70 60 q2 6 6 0 q-4 6 -6 0" />
-                  <path d="M96 66 q2 6 6 0 q-4 6 -6 0" />
-                  <path d="M122 62 q2 6 6 0 q-4 6 -6 0" />
+                  <path className="precip-drop" style={{ animationDelay: "0ms" }} d="M90 60 q2 6 6 0 q-4 6 -6 0" />
+                  <path className="precip-drop" style={{ animationDelay: "120ms" }} d="M110 66 q2 6 6 0 q-4 6 -6 0" />
+                  <path className="precip-drop" style={{ animationDelay: "240ms" }} d="M130 62 q2 6 6 0 q-4 6 -6 0" />
+                </g>
+              )}
+
+              {/* Ríos (acumulación y flujo) */}
+              {idx === 3 && (
+                <g>
+                  <path d="M0 120 C 40 110, 80 130, 120 120 S 200 140, 240 120" stroke="#3b82f6" strokeWidth="3" fill="none" />
+                  <polygon points="200,125 208,120 200,115" fill="#3b82f6" />
                 </g>
               )}
             </svg>

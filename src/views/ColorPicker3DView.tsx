@@ -133,7 +133,7 @@ export default function ColorPicker3DView() {
     }
     try {
       localStorage.setItem(STORAGE_KEY, currentHex);
-    } catch (e) {
+    } catch {
       // ignore storage errors
     }
   }, [currentHex]);
@@ -200,14 +200,16 @@ export default function ColorPicker3DView() {
   };
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-medium">Cambiar color 3D</h2>
+    <div className="space-y-4 max-w-6xl mx-auto">
+      <h2 className="text-xl font-semibold tracking-tight text-slate-100">Cambiar color 3D</h2>
 
       <div className="flex items-center gap-4">
         <ColorPalette currentHex={currentHex} onSetHex={setColor} onRandom={setRandomColor} onReset={resetColor} currentModel={model} onSetModel={(m) => setModel(m)} />
       </div>
 
-      <div ref={stageRef} className="w-full  h-[420px] border bg-gray-500" aria-label="Escena 3D" />
+      <div className="rounded-2xl border border-slate-200/40 dark:border-slate-800/60 bg-white/5 dark:bg-slate-900/20 shadow-sm overflow-hidden">
+        <div ref={stageRef} className="w-full h-[420px]" aria-label="Escena 3D" />
+      </div>
     </div>
   );
 }
